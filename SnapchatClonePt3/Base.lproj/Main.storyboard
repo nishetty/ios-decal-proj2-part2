@@ -556,7 +556,7 @@
                                     <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
                                 <connections>
-                                    <segue destination="Bgm-d3-MSb" kind="show" id="47p-s1-eZk"/>
+                                    <segue destination="Bgm-d3-MSb" kind="show" identifier="backToLogin" id="47p-s1-eZk"/>
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sign Up" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LBK-ef-xTR">
@@ -616,6 +616,6 @@
         <image name="unread" width="158" height="158"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="gy8-yE-N3R"/>
+        <segue reference="kay-2u-79c"/>
     </inferredMetricsTieBreakers>
 </document>

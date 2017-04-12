@@ -53,6 +53,17 @@ func clearThreads() {
     Finally, save the actual data to the storage module by calling the store function below.
  
     Remember, DO NOT USE ACTUAL STRING VALUES WHEN REFERENCING A PATH! YOU SHOULD ONLY USE THE CONSTANTS DEFINED IN CONSTANTS.SWIFT
+ et dateFormat = "yyyy-MM-dd HH:mm:ss.A"
+ 
+ let firUsersNode = "Users"
+ let firReadPostsNode = "readPosts"
+ let firPostsNode = "Posts"
+ let firUsernameNode = "username"
+ let firThreadNode = "thread"
+ let firDateNode = "date"
+ let firImagePathNode = "imagePath"
+ let firStorageImagesPath = "Images"
+
 
 */
 func addPost(postImage: UIImage, thread: String, username: String) {
@@ -61,6 +72,12 @@ func addPost(postImage: UIImage, thread: String, username: String) {
     let path = "\(firStorageImagesPath)/\(UUID().uuidString)"
     
     // YOUR CODE HERE
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = dateFormat
+    let newDate = dateFormatter.string(from: Date())
+    let postdict = [firImagePathNode: path, firThreadNode: thread, firUsernameNode: username, firDateNode: newDate]
+    dbRef.child(firPostsNode).childByAutoId().setValue(postdict)
+    store(data: data, toPath: path)
 }
 
 /*
@@ -75,6 +92,12 @@ func store(data: Data, toPath path: String) {
     let storageRef = FIRStorage.storage().reference()
     
     // YOUR CODE HERE
+    storageRef.child(path).put(data, metadata: nil) {
+        (metadata, error) in
+        if let error = error {
+            print(error)
+        }
+    }
 }
 
 
@@ -83,7 +106,7 @@ func store(data: Data, toPath path: String) {
     
     This function should query Firebase for all posts and return an array of Post objects. 
     You should use the function 'observeSingleEvent' (with the 'of' parameter set to .value) to get a snapshot of all of the nodes under "Posts".
-    If the snapshot exists, store its value as a dictionary of type [String:AnyObject], where the string key corresponds to the ID of each post. 
+    If the snapshot exists, store its value as a dictionary of type [String:AnyObject], where the string key corresponds to the ID of each post.
  
     Then, make a query for the user's read posts ID's. In the completion handler, complete the following:   
         - Iterate through each of the keys in the dictionary
@@ -100,6 +123,40 @@ func getPosts(user: CurrentUser, completion: @escaping ([Post]?) -> Void) {
     var postArray: [Post] = []
     
     // YOUR CODE HERE
+    dbRef.child(firPostsNode).observeSingleEvent(of: .value, with: {(snapshot) in
+        if snapshot.exists() {
+            let shot = snapshot.value as? [String: AnyObject]
+            user.getReadPostIDs(completion: {(readPosts) in
+                for (key, object) in shot! {
+                    
+                    //initialize as strings
+                    var userKey = ""
+                    var dateKey = ""
+                    var threadKey = ""
+                    var pathKey = ""
+                    
+                    if let username = object.value(forKey: firUsernameNode) as? String {
+                        userKey = username
+                    }
+                    if let path = object.value(forKey: firImagePathNode) as? String {
+                        pathKey = path
+                    }
+                    if let thread = object.value(forKey: firThreadNode) as? String {
+                        threadKey = thread
+                    }
+                    if let date = object.value(forKey: firDateNode) as? String {
+                        dateKey = date
+                    }
+                    //create new post object and add to array
+                    let postObj = Post(id: key, username: userKey, postImagePath: pathKey, thread: threadKey, dateString: dateKey, read: readPosts.contains(key))
+                    postArray.append(postObj)
+                }
+                completion(postArray)
+            })
+        } else {
+            completion(nil)
+        }
+    })
 }
 
 func getDataFromPath(path: String, completion: @escaping (Data?) -> Void) {

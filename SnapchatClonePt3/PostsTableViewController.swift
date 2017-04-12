@@ -52,6 +52,7 @@ class PostsTableViewController: UIViewController, UITableViewDelegate, UITableVi
     */
     override func viewWillAppear(_ animated: Bool) {
         // YOUR CODE HERE
+        updateData()
     }
 
     override func didReceiveMemoryWarning() {
@@ -72,8 +73,24 @@ class PostsTableViewController: UIViewController, UITableViewDelegate, UITableVi
     */
     func updateData() {
         // YOUR CODE HERE
+        getPosts(user: currentUser) {(posts) in
+            if let posts = posts {
+                clearThreads()
+                for post in posts {
+                    addPostToThread(post: post)
+                    getDataFromPath(path: post.postImagePath, completion: {
+                        (image) in
+                        if let image = image {
+                            let image = UIImage(data: image)
+                            self.loadedImagesById[post.postId] = image
+                        }
+                    })
+                }
+                self.postTableView.reloadData()
+            }
+        }
     }
-    
+
     // MARK: Custom methods (relating to UI)
     
     func hidePostImage(sender: UIButton) {
@@ -145,6 +162,7 @@ class PostsTableViewController: UIViewController, UITableViewDelegate, UITableVi
             post.read = true
             
             // YOUR CODE HERE
+            currentUser.addNewReadPost(postID: post.postId)
             
             tableView.reloadRows(at: [indexPath], with: .automatic)
         }
